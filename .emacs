@@ -23,3 +23,11 @@
 (require 'auto-complete-config)
 (add-to-list 'ac-dictionary-directories "~/.emacs.d/auto-complete/ac-dict")
 (ac-config-default)
+
+;; Turn off the toolbar
+(if (boundp 'tool-bar-mode)
+    (tool-bar-mode -1))
+(menu-bar-mode -1)
+
+;; Turn off Aquamacs buffer bar
+(tabbar-mode -1)

@@ -1,3 +1,5 @@
 [user]
 	email = github.com@waisbrot.net
 	name = Nathaniel Waisbrot
+[push]
+	default = simple

@@ -23,7 +23,7 @@
 (require 'auto-complete-config)
 (add-to-list 'ac-dictionary-directories "~/.emacs.d/auto-complete/ac-dict")
 (ac-config-default)
-(add-hook 'erlang-mode-hook 'ac-common-setup)
+(add-to-list 'ac-modes 'erlang-mode)  ; do AC in erlang-mode
 
 ;; CEDET
 (load-file "~/.emacs.d/cedet-1.1/common/cedet.el")
@@ -39,10 +39,11 @@
 (if (boundp 'tool-bar-mode)
     (tool-bar-mode -1))
 (menu-bar-mode -1)
-
 ;; Turn off Aquamacs buffer bar
 (if (boundp 'tabbar-mode)
     (tabbar-mode -1))
+;; No splash screen
+(setq inhibit-startup-message t)
 
 ;; Assume that we'll SSH to remote files
 (setq tramp-default-method "ssh")
@@ -74,4 +75,11 @@
  '(default ((t (:height 160 :family "Source_Code_Pro")))))
 
 ;; Use CPerl mode instead of Perl mode
- (defalias 'perl-mode 'cperl-mode)
+(defalias 'perl-mode 'cperl-mode)
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(blink-matching-delay 1)
+ '(show-paren-mode t))

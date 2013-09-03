@@ -1,15 +1,16 @@
+;; -*- mode: emacs-lisp; -*-
 ;; Emacs init file
-;; Under Aquamacs, this is named ~/Library/Preferences/Aquamacs Emacs/Preferences.el
-
+;; Under Aquamacs, this can be named ~/Library/Preferences/Aquamacs Emacs/Preferences.el
 
 ;; Erlang (assumes that Erlang is installed already)
-(setq load-path (cons "/usr/local/lib/erlang/lib/tools-2.6.8/emacs" load-path))
 (setq erlang-root-dir "/usr/local/lib/erlang")
-(setq exec-path (cons "/usr/local/lib/erlang/bin" exec-path))
+(let ((default-directory erlang-root-dir))
+  (setq load-path (cons (expand-file-name "lib/tools-2.6.8/emacs") load-path))
+  (setq exec-path (cons (expand-file-name "bin") exec-path)))
 (require 'erlang-start)
 
 ;; Auto-install: http://www.emacswiki.org/AutoInstall
-(add-to-list 'load-path (expand-file-name "~/elisp"))
+(add-to-list 'load-path (expand-file-name "~/.emacs.d/auto-install"))
 (require 'auto-install)
 
 ;; "Interactively Do Things": http://www.emacswiki.org/emacs/InteractivelyDoThings
@@ -17,12 +18,22 @@
 (require 'ido)
 (ido-mode t)
 
-
 ;; Auto-complate: http://cx4a.org/software/auto-complete/index.html
 (add-to-list 'load-path "~/.emacs.d/auto-complete/")
 (require 'auto-complete-config)
 (add-to-list 'ac-dictionary-directories "~/.emacs.d/auto-complete/ac-dict")
 (ac-config-default)
+(add-hook 'erlang-mode-hook 'ac-common-setup)
+
+;; CEDET
+(load-file "~/.emacs.d/cedet-1.1/common/cedet.el")
+;(global-ede-mode 1)                      ; Enable the Project management system
+(semantic-load-enable-code-helpers)      ; Enable prototype help and smart completion 
+(global-srecode-minor-mode 1)            ; Enable template insertion menu
+(global-semantic-idle-completions-mode 1)
+(global-semantic-decoration-mode 1)
+(global-semantic-highlight-func-mode 1)
+(global-semantic-show-unmatched-syntax-mode 1)
 
 ;; Turn off the toolbar
 (if (boundp 'tool-bar-mode)
@@ -30,4 +41,37 @@
 (menu-bar-mode -1)
 
 ;; Turn off Aquamacs buffer bar
-(tabbar-mode -1)
+(if (boundp 'tabbar-mode)
+    (tabbar-mode -1))
+
+;; Assume that we'll SSH to remote files
+(setq tramp-default-method "ssh")
+
+;; Use regex for the incremental search
+(global-set-key (kbd "C-s") 'isearch-forward-regexp)
+(global-set-key (kbd "C-r") 'isearch-backward-regexp)
+
+;; Don't beep; visible bell seems to be a small white square, which is tolerable.
+(setq visible-bell 1)
+
+;; Don't ring the bell for dumb stuff like typing C-g
+(setq ring-bell-function 
+      (lambda ()
+	(unless (memq this-command
+		      '(isearch-abort abort-recursive-edit exit-minibuffer keyboard-quit 
+				      mwheel-scroll down up next-line previous-line
+				      backward-char forward-char forward-page backward-page
+				      scroll-up-command scroll-down-command))
+	  (ding))))
+;playing a sound file from emacs: (call-process "afplay" nil 0 nil "/System/Library/Sounds/Purr.aiff")
+
+(load-theme 'misterioso)
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(default ((t (:height 160 :family "Source_Code_Pro")))))
+
+;; Use CPerl mode instead of Perl mode
+ (defalias 'perl-mode 'cperl-mode)

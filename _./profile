@@ -1,10 +1,6 @@
 ## -*- mode: sh; -*-
 ## Basic Bash profile
 
-# prompt:
-# <hostname>:<current dir> <username>[<shell jobs>]<history number>! <$/#>
-export PS1='\h:\W \u[\j]\!!\$ '
-
 function select_first_existing() {
     var=$1
     shift
@@ -30,3 +26,14 @@ if [ "$COMPLETION_SCRIPT" != "" ] ; then
   fi
 fi
 
+# hack because some Bashes load this, others like .bash_profile, and others do both
+export LOADED_PROFILE_OK=true
+
+if [ -z $LOADED_BASH_PROFILE_OK ]; then
+    . $HOME/.bash_profile
+fi
+
+if [ -z $LOADED_BASHRC_OK ]; then
+    . $HOME/.bashrc
+fi
+_byobu_sourced=1 . /amd/home/nwaisbrot/bin/byobu-launch

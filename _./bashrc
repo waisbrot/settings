@@ -1,0 +1,7 @@
+## -*- mode: sh; -*-
+
+# prompt:
+# <hostname>:<current dir> <username>[<shell jobs>]<history number>! <$/#>
+export PS1='\h:\W \u[\j]\!!\$ '
+
+export LOADED_BASHRC_OK=true

@@ -1,1 +1,13 @@
+## -*- mode: sh; -*-
 
+# if we haven't loaded .profile yet, load it right now
+if [ -z $LOADED_PROFILE_OK ]; then
+    . $HOME/.profile
+fi
+
+export PATH=$HOME/bin:$PATH
+export LD_LIBRARY_PATH=$HOME/lib
+
+# hack around making sure both profiles get loaded
+export LOADED_BASH_PROFILE_OK=true
+_byobu_sourced=1 . /amd/home/nwaisbrot/bin/byobu-launch

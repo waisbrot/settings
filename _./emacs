@@ -66,6 +66,22 @@
 	  (ding))))
 ;playing a sound file from emacs: (call-process "afplay" nil 0 nil "/System/Library/Sounds/Purr.aiff")
 
+;; Org-mode
+(require 'org-install)
+(add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
+(define-key global-map "\C-cl" 'org-store-link)
+(define-key global-map "\C-ca" 'org-agenda)
+(setq org-log-done t)
+
+;; Write backup files to own directory
+(setq backup-directory-alist
+      `(("." . ,(expand-file-name
+                 (concat (getenv "HOME") "/emacs-backups")))))
+
+;; Make backups of files, even when they're in version control
+(setq vc-make-backup-files t)
+
+
 (load-theme 'misterioso)
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -82,4 +98,6 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(blink-matching-delay 1)
- '(show-paren-mode t))
+ '(org-agenda-files (quote ("~/org")))
+ '(show-paren-mode t)
+ '(vc-follow-symlinks t))

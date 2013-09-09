@@ -1,14 +1,30 @@
+## -*- mode: sh; -*-
 ## Basic Bash profile
 
 # prompt:
 # <hostname>:<current dir> <username>[<shell jobs>]<history number>! <$/#>
 export PS1='\h:\W \u[\j]\!!\$ '
 
+function select_first_existing() {
+    var=$1
+    shift
+    for file in "$@"; do 
+	if [ -e $file ]; then
+	    eval "$var=$file"
+	    return 0
+	fi
+    done
+    return 1
+}
 
 # Get bash-completion from 
 # http://bash-completion.alioth.debian.org/files/
 # Assume that we're doing a userspace install with --prefix=$HOME, but adjust this variable to whatever
-COMPLETION_SCRIPT=$HOME/share/bash-completion/bash_completion
+select_first_existing(COMPLETION_SCRIPT \
+			/etc/bash_completion \
+			/usr/local/etc/bash_completion \
+			$HOME/share/bash-completion/bash_completion)
 if [ -f $COMPLETION_SCRIPT ]; then
   . $COMPLETION_SCRIPT
 fi
+

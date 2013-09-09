@@ -5,7 +5,6 @@ use warnings;
 use File::Basename qw/dirname/;
 use File::Listing qw/parse_dir/;
 use File::Copy qw/move/;
-use Getopt::Long::Descriptive qw/describe_options/;
 
 sub dolink {
   my ($reference_file, $target_file, $backup_file) = @_;
@@ -54,26 +53,22 @@ sub mkdir_or_link {
   }
 }
 
-my ($opt, $usage) = describe_options(
-				     '%c %o',
-				     [ 'install', "install the settings files"],
-				     [ 'unlink',  "remove linked files"],
-				     [],
-				     [ 'help',       "print usage message and exit" ],
-				    );
-print($usage->text), exit if $opt->help;
-
 my $HOME = $ENV{HOME} or die "Can't figure out your HOME";
 my $oldfiles = "$HOME/old-settings";
 my $settingsdir = "$ENV{PWD}/".dirname($0);
 
-if ($opt->install) {
+my $command = shift or die "Usage: $0 <install|unlink>\n";
+
+if ($command eq 'install') {
   if (-e $oldfiles) {
     die "Directory of old settings already exists: $oldfiles";
   }
   die unless mkdir $oldfiles;
   mkdir_or_link(\&dolink, "", $settingsdir, $HOME, $oldfiles);
-} elsif ($opt->unlink) {
+} elsif ($command eq 'unlink') {
   mkdir_or_link(\&rmlink, "", $settingsdir, $HOME, $oldfiles);
+} else {
+  die "Usage $0 <install|unlink>\n";
 }
+
 

@@ -13,27 +13,29 @@ function select_first_existing() {
     return 1
 }
 
-# Get bash-completion from 
-# http://bash-completion.alioth.debian.org/files/
-# Assume that we're doing a userspace install with --prefix=$HOME, but adjust this variable to whatever
-select_first_existing COMPLETION_SCRIPT \
-			/etc/bash_completion \
-			/usr/local/etc/bash_completion \
-			$HOME/share/bash-completion/bash_completion
-if [ "$COMPLETION_SCRIPT" != "" ] ; then
-  if [ -f $COMPLETION_SCRIPT ] ; then
-    . $COMPLETION_SCRIPT
-  fi
-fi
-
-# hack because some Bashes load this, others like .bash_profile, and others do both
-export LOADED_PROFILE_OK=true
-
-if [ -z $LOADED_BASH_PROFILE_OK ]; then
-    . $HOME/.bash_profile
-fi
-
-if [ -z $LOADED_BASHRC_OK ]; then
-    . $HOME/.bashrc
-fi
-_byobu_sourced=1 . /amd/home/nwaisbrot/bin/byobu-launch
+if [ "$SHELL" = "/bin/bash" ]; then
+    # Get bash-completion from 
+    # http://bash-completion.alioth.debian.org/files/
+    # Assume that we're doing a userspace install with --prefix=$HOME, but adjust this variable to whatever
+    select_first_existing COMPLETION_SCRIPT \
+	/etc/bash_completion \
+	/usr/local/etc/bash_completion \
+	$HOME/share/bash-completion/bash_completion
+    if [ "$COMPLETION_SCRIPT" != "" ] ; then
+	if [ -f $COMPLETION_SCRIPT ] ; then
+	    . $COMPLETION_SCRIPT
+	fi
+    fi
+    
+    # hack because some Bashes load this, others like .bash_profile, and others do both
+    export LOADED_PROFILE_OK=true
+    
+    if [ -z $LOADED_BASH_PROFILE_OK ]; then
+	. $HOME/.bash_profile
+    fi
+    
+    if [ -z $LOADED_BASHRC_OK ]; then
+	. $HOME/.bashrc
+    fi
+    _byobu_sourced=1 . /amd/home/nwaisbrot/bin/byobu-launch
+fi # if bash

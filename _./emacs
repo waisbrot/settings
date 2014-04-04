@@ -2,28 +2,109 @@
 ;; Emacs init file
 ;; Under Aquamacs, this can be named ~/Library/Preferences/Aquamacs Emacs/Preferences.el
 
+(defun get-ip-addresses ()
+  "Returns the current system IPv4 addresses as a list of
+strings"
+  (let* ((start 0)
+;	 (match-positions ())
+	 (ip-re  "[1-9][0-9][0-9]?\.[0-9][0-9]?[0-9]?\.[0-9][0-9]?[0-9]?\.[0-9][0-9]?[0-9]?")
+	 ;; The rest of these variables try to make this platform agnostic.
+	 ;; Add more on to the cond statements if you need
+	 (ipconfig (cond ((eq system-type 'windows-nt)
+			  "ipconfig")
+			 ((eq system-type 'gnu/linux)
+			  "/sbin/ifconfig")
+			 ((eq system-type 'darwin)
+			  "/sbin/ifconfig")
+			 (t (error "Don't know how to get-ip-address for %s"
+				   system-type))))
+	 (line-re (cond ((eq system-type 'windows-nt)
+			 "IPv4 Address.*")
+			((eq system-type 'gnu/linux)
+			 (concat "inet addr:" ip-re))
+			((eq system-type 'darwin)
+			 (concat "inet " ip-re))
+			(t (error "Don't know how regex out ip line for %s"
+				  system-type))))
+	 ;; I lied, not all of the rest of the variables are to make it
+	 ;; platform agnostic.  This is where we grab the output
+	 (output (shell-command-to-string ipconfig)))
+
+    ;; The inner loop is a bit funky since I can't seem to get it to behave
+    ;; exactly like Common Lisp
+    (loop for pos in
+	  (loop named inner
+		with match-positions = ()
+		do (let ((ret (string-match line-re output start)))
+		     (if ret
+			 (setq start (1+ ret))
+		       (return-from inner match-positions))
+		     (setq match-positions
+			   (append match-positions (list ret)))))
+	  collect (progn
+		    (string-match ip-re output pos)
+		    (match-string 0 output)))))
+
 ;; Erlang (assumes that Erlang is installed already)
 (setq erlang-root-dir "/usr/local/lib/erlang")
 (let ((default-directory erlang-root-dir))
-  (setq load-path (cons (expand-file-name "lib/tools-2.6.8/emacs") load-path))
+  (setq load-path (cons (expand-file-name "lib/tools-2.6.13/emacs") load-path))
   (setq exec-path (cons (expand-file-name "bin") exec-path)))
+;; add some custom stuff for Erlang templates
+(setq *copyright-organization* "Imprivata")
+(setq user-mail-address "nwaisbrot@imprivata.com")
+(setq erlang-skel-file "~/.emacs.d/erlang-skels-cortext")
 (require 'erlang-start)
+
+;; Some Erlang customizations
+(setq erlang-electric-commands '(erlang-electric-comma 
+				 erlang-electric-semicolon
+				 erlang-electric-gt
+				 erlang-electric-newline))
+(defun my-erlang-mode-hook ()
+  ;; when starting an Erlang shell in Emacs, default in the node name
+  (setq inferior-erlang-machine-options (list "-name" (concat "emacs@" (cadr (get-ip-addresses)))))
+  )
+(defun my-erlang-new-file-hook ()
+  (cond
+   ;; Insert appropriate template for IQ services
+   ((string-match-p "^cortext_service_.+" (erlang-get-module-from-file-name))
+    (tempo-template-erlang-cortext-ej-service))
+   ;; Default: just put in a header
+   ('t 
+    (tempo-template-erlang-cortext-header)))
+  )
+(add-hook 'erlang-mode-hook 'my-erlang-mode-hook)
+(add-hook 'erlang-new-file-hook 'my-erlang-new-file-hook)
+
+;; Nitrogen, a web framework for Erlang
+(add-to-list 'load-path (expand-file-name "~/git/nitrogen/support/nitrogen-mode"))
+(require 'nitrogen-mode)
 
 ;; Auto-install: http://www.emacswiki.org/AutoInstall
 (add-to-list 'load-path (expand-file-name "~/.emacs.d/auto-install"))
 (require 'auto-install)
+
+;; Puppet
+(autoload 'puppet-mode "puppet-mode" "Major mode for editing puppet manifests")
+(add-to-list 'auto-mode-alist '("\\.pp$" . puppet-mode))
+
+;; Perforce version control integration
+;(require 'vc-p4)
 
 ;; "Interactively Do Things": http://www.emacswiki.org/emacs/InteractivelyDoThings
 ;; Does buffer switching and file selection more aggressively
 (require 'ido)
 (ido-mode t)
 
+(require 'web-mode)
+
 ;; Auto-complate: http://cx4a.org/software/auto-complete/index.html
-(add-to-list 'load-path "~/.emacs.d/auto-complete/")
-(require 'auto-complete-config)
-(add-to-list 'ac-dictionary-directories "~/.emacs.d/auto-complete/ac-dict")
-(ac-config-default)
-(add-to-list 'ac-modes 'erlang-mode)  ; do AC in erlang-mode
+;(add-to-list 'load-path "~/.emacs.d/auto-complete/")
+;(require 'auto-complete-config)
+;(add-to-list 'ac-dictionary-directories "~/.emacs.d/auto-complete/ac-dict")
+;(ac-config-default)
+;(add-to-list 'ac-modes 'erlang-mode)  ; do AC in erlang-mode
 
 ;; CEDET
 (load-file "~/.emacs.d/cedet-1.1/common/cedet.el")
@@ -66,6 +147,10 @@
 	  (ding))))
 ;playing a sound file from emacs: (call-process "afplay" nil 0 nil "/System/Library/Sounds/Purr.aiff")
 
+;; Allow customization of unique buffer naming, so I don't have to use
+;; foo, foo<2>, foo<3> as buffers
+(require 'uniquify)
+
 ;; Org-mode
 (require 'org-install)
 (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
@@ -96,6 +181,8 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(default ((t (:height 160 :family "Source_Code_Pro"))))
+ '(highlight ((t (:background "Yellow" :foreground "Black"))))
+ '(secondary-selection ((t (:background "Yellow" :foreground "black"))))
  '(semantic-tag-boundary-face ((t (:overline "#666666")))))
 
 ;; Use CPerl mode instead of Perl mode
@@ -106,6 +193,12 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(blink-matching-delay 1)
+ '(bookmark-save-flag 1)
+ '(clean-buffer-list-kill-regexps (quote ("^ *\\*Customize .*\\*$")))
+ '(ediff-window-setup-function (quote ediff-setup-windows-plain))
+ '(grep-highlight-matches t)
+ '(midnight-mode t nil (midnight))
  '(org-agenda-files (quote ("~/org")))
  '(show-paren-mode t)
+ '(uniquify-buffer-name-style (quote post-forward) nil (uniquify))
  '(vc-follow-symlinks t))

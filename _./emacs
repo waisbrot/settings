@@ -85,6 +85,10 @@ strings"
 (add-to-list 'load-path (expand-file-name "~/.emacs.d/auto-install"))
 (require 'auto-install)
 
+;; Color themes
+(add-to-list 'load-path (expand-file-name "~/.emacs.d/color-theme"))
+(require 'color-theme)
+
 ;; Puppet
 (autoload 'puppet-mode "puppet-mode" "Major mode for editing puppet manifests")
 (add-to-list 'auto-mode-alist '("\\.pp$" . puppet-mode))

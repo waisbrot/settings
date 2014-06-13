@@ -1,15 +1,7 @@
 ## -*- mode: sh; -*-
 
-# if we haven't loaded .profile yet, load it right now
-if [ -z $LOADED_PROFILE_OK ]; then
-    . $HOME/.profile
-fi
-
 export PATH=$HOME/bin:$PATH
 export LD_LIBRARY_PATH=$HOME/lib
+export PATH=/usr/local/bin:$PATH
 
-# hack around making sure both profiles get loaded
-export LOADED_BASH_PROFILE_OK=true
-_byobu_sourced=1 . /amd/home/nwaisbrot/bin/byobu-launch
-
-[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
+source ~/.whooprc

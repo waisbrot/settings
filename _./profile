@@ -4,7 +4,7 @@
 function select_first_existing() {
     var=$1
     shift
-    for file in "$@"; do 
+    for file in "$@"; do
 	if [ -e $file ]; then
 	    eval "$var=$file"
 	    return 0
@@ -14,7 +14,7 @@ function select_first_existing() {
 }
 
 if [ "$SHELL" = "/bin/bash" ]; then
-    # Get bash-completion from 
+    # Get bash-completion from
     # http://bash-completion.alioth.debian.org/files/
     # Assume that we're doing a userspace install with --prefix=$HOME, but adjust this variable to whatever
     select_first_existing COMPLETION_SCRIPT \
@@ -25,17 +25,5 @@ if [ "$SHELL" = "/bin/bash" ]; then
 	if [ -f $COMPLETION_SCRIPT ] ; then
 	    . $COMPLETION_SCRIPT
 	fi
-    fi
-    
-    # hack because some Bashes load this, others like .bash_profile, and others do both
-    export LOADED_PROFILE_OK=true
-    
-    if [ -z $LOADED_BASH_PROFILE_OK ]; then
-	. $HOME/.bash_profile
-    fi
-    
-    if [ -z $LOADED_BASHRC_OK ]; then
-	. $HOME/.bashrc
-    fi
-    _byobu_sourced=1 . /amd/home/nwaisbrot/bin/byobu-launch
+    fi    
 fi # if bash
